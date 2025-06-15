@@ -5,6 +5,9 @@ import { Button } from '../components/ui/button';
 import { AI_PROMPT, SelectBudgetOptions, SelectTravelersList } from '../constants/options';
 import { toast } from 'sonner';
 import { FcGoogle } from "react-icons/fc";
+import { db } from '../service/firebaseConfig';
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+
 
 import {
   Dialog,
@@ -17,12 +20,17 @@ import {
 import { generateTravelPlanJson } from '../service/AIModel';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { doc, setDoc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const CreateTrip = () => {
   const [place, setPlace] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
   const [formData, setFormData] = useState({});
+  const [loading,setLoading]=useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+
+  const navigate=useNavigate();
 
   function handleInputChange(name, value) {
     setFormData({
@@ -55,35 +63,28 @@ const CreateTrip = () => {
 
   const OnGenerateTrip = async () => {
 
-    const user = localStorage.getItem("user");
-
-    if (!user) {
-
-      setOpenDialog(true);
-      return
-    }
-
-    if (!formData?.location || !formData?.noOfDays || !formData?.budget || !formData?.people) {
-      toast("Please fill all details.");
-      return;
-    }
-
+    setLoading(true);
     const FINAL_PROMPT = AI_PROMPT
-      .replace('{location}', formData?.location?.label || 'somewhere')
-      .replace('{totalDays}', formData?.noOfDays || 'X')
-      .replace('{traveler}', formData?.people || 'a few people')
-      .replace('{budget}', formData?.budget || 'some')
-      .replace('{days}', formData?.noOfDays || 'X');
-
-    console.log("Final Prompt:\n", FINAL_PROMPT);
+      .replace('{location}', formData?.location?.label || '')
+      .replace('{totalDays}', formData?.noOfDays || '')
+      .replace('{traveler}', formData?.people || '')
+      .replace('{budget}', formData?.budget || '')
+      .replace('{days}', formData?.noOfDays || '');
 
     const responseText = await generateTravelPlanJson(FINAL_PROMPT);
 
     if (responseText) {
       try {
         const parsedPlan = JSON.parse(responseText);
-        console.log("Parsed Plan:", parsedPlan);
-        // You can update your app state here to display the plan
+        // console.log(parsedPlan);
+
+        const tripData = parsedPlan?.TravelPlan;
+        if (!tripData) {
+          toast("AI did not return valid trip data.");
+          return;
+        }
+
+        await SaveAiTrip(tripData);
       } catch (error) {
         console.error("Error parsing response:", error);
         toast("Failed to parse AI response.");
@@ -92,6 +93,39 @@ const CreateTrip = () => {
       toast("Failed to generate trip plan.");
     }
   };
+
+  const SaveAiTrip = async (TripData) => {
+    try {
+      setLoading(true);
+      // console.log("Saving TripData:", TripData);
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      const docId = Date.now().toString();
+
+      const dataToSave = {
+        userSelection: formData,
+        TripData: TripData,
+        userEmail: user?.email ?? "unknown",
+        id: docId,
+      };
+
+      Object.keys(dataToSave).forEach(
+        (key) => dataToSave[key] === undefined && delete dataToSave[key]
+      );
+
+      await setDoc(doc(db, "AITrips", docId), dataToSave);
+      navigate("/view-trip/"+docId);
+
+      toast("Trip saved successfully!");
+    } catch (error) {
+      console.error("Error saving trip:", error);
+      toast("Failed to save trip.");
+    } finally {
+      setLoading(false);
+
+    }
+  };
+
 
   const GetUser=(tokenInfo)=>{
     axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,{
@@ -185,7 +219,11 @@ const CreateTrip = () => {
       </div>
 
       <div className='my-10 flex justify-end'>
-        <Button onClick={OnGenerateTrip}>Generate Trip</Button>
+        
+        <Button disabled={loading} onClick={OnGenerateTrip}>
+          { loading?<AiOutlineLoading3Quarters className='h-7 w-7 animate-spin'/> :"Generate Trip"}
+          </Button>
+        
       </div>
       <Dialog open={openDialog}>
   <DialogContent>

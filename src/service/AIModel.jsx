@@ -65,7 +65,7 @@ export async function generateTravelPlanJson(promptText) {
     });
 
     const text = result.response.text().trim();
-    console.log("Raw Gemini Response:", text);
+    // console.log("Raw Gemini Response:", text);
 
     // Try extracting JSON content from mixed text
     const jsonMatch = text.match(/\{[\s\S]*\}/);
