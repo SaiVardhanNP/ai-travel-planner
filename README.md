@@ -1,12 +1,52 @@
-# React + Vite
+# 🧳 SmartTrip AI – AI-Based Travel Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**SmartTrip AI** is a full-stack web application that helps users plan smart, customized travel itineraries using AI. It takes your preferences and location input to generate personalized travel plans, including places to visit, weather info, and more — all powered by LLMs.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## Expanding the ESLint configuration
+- ✈️ Input your destination and travel duration
+- 💡 AI-generated personalized itinerary
+- ☁️ Live weather updates via OpenWeatherMap API
+- 🗺️ Interactive UI for viewing plans
+- 🔐 User authentication (coming soon)
+- 🎨 Minimalist, responsive frontend
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🧠 Tech Stack
+
+**Frontend:**
+- React.js
+- Tailwind CSS
+- Framer Motion
+
+**Backend & APIs:**
+- Firebase (Firestore + Hosting)
+- Gemini API (LLM integration)
+- OpenWeatherMap API
+
+---
+
+## 📸 Screenshots
+
+![SmartTrip AI Homepage](https://i.postimg.cc/ts0zNRkS/homepage.png)
+
+---
+
+## ⚙️ How It Works
+
+1. User enters destination and travel duration.
+2. The app uses **Google Gemini API** to generate a personalized itinerary.
+3. Live weather data is fetched via **OpenWeatherMap**.
+4. The result is displayed in a clean, animated interface using **React + Framer Motion**.
+
+---
+
+## 📦 Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/SaiVardhanNP/ai-travel-planner.git
+cd ai-travel-planner
